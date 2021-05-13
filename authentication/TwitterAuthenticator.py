@@ -33,6 +33,7 @@ class TwitterAuthenticator(AuthenticatorInterface):
             # verify the Twitter section
             if 'Twitter' in config:
                 try:
+                    self._log.user_message('Trying to configure the connection with the Twitter API.')
                     self._api_key = config['Twitter']['api_key']
                     self._api_secret_key = config['Twitter']['api_secret_key']
                     self._access_token = config['Twitter']['access_token']
@@ -40,7 +41,7 @@ class TwitterAuthenticator(AuthenticatorInterface):
 
                     self.authenticate()
                 except:
-                    self._log.error('Twitter keys not found or incorrect. Verify the Twitter section in the config file.')               
+                    self._log.exception('Twitter keys not found or incorrect. Verify the Twitter section in the config file.')               
             else:
                 self._log.error('Twitter section not found. Verify the Twitter section in the config file.')               
 
@@ -48,3 +49,4 @@ class TwitterAuthenticator(AuthenticatorInterface):
         auth = tw.OAuthHandler(self._api_key, self._api_secret_key)
         auth.set_access_token(self._access_token, self._access_token_secret)
         self._api = tw.API(auth, wait_on_rate_limit=True)
+        self._log.user_message('Connection with the Twitter API configured.')
