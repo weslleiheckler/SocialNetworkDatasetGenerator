@@ -4,14 +4,14 @@ import configparser, os
 
 class TwitterAuthenticator(AuthenticatorInterface):
     
-    def __init__(self, logging) -> None:
+    def __init__(self, log) -> None:
         super().__init__()
         self._api_key = None
         self._api_secret_key = None
         self._access_token = None
         self._access_token_secret = None
         self._api = None
-        self._logging = logging
+        self._log = log
 
     @property
     def api(self):
@@ -24,7 +24,7 @@ class TwitterAuthenticator(AuthenticatorInterface):
         
         # check whether the config file exists
         if not os.path.exists('config/config.ini'): 
-            self._logging.error('Configuration file not found. Verify whether the config.ini file is in the config subdirectory.')
+            self._log.error('Configuration file not found. Verify whether the config.ini file is in the config subdirectory.')
         else:
             # read the connection configurations in the ini file
             config = configparser.ConfigParser()
@@ -40,9 +40,9 @@ class TwitterAuthenticator(AuthenticatorInterface):
 
                     self.authenticate()
                 except:
-                    self._logging.error('Twitter keys not found or incorrect. Verify the Twitter section in the config file.')               
+                    self._log.error('Twitter keys not found or incorrect. Verify the Twitter section in the config file.')               
             else:
-                self._logging.error('Twitter section not found. Verify the Twitter section in the config file.')               
+                self._log.error('Twitter section not found. Verify the Twitter section in the config file.')               
 
     def authenticate(self) -> None:
         auth = tw.OAuthHandler(self._api_key, self._api_secret_key)

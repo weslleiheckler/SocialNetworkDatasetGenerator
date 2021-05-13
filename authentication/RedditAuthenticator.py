@@ -5,7 +5,7 @@ import configparser, os
 
 class RedditAuthenticator(AuthenticatorInterface):
 
-    def __init__(self, logging) -> None:
+    def __init__(self, log) -> None:
         super().__init__()
         self._client_id = None
         self._client_secret = None
@@ -13,7 +13,7 @@ class RedditAuthenticator(AuthenticatorInterface):
         self._username = None
         self._password = None
         self._api = None
-        self._logging = logging
+        self._log = log
 
     @property
     def api(self):
@@ -25,7 +25,7 @@ class RedditAuthenticator(AuthenticatorInterface):
     def import_config(self) -> None:
         # check whether the config file exists
         if not os.path.exists('config/config.ini'): 
-            self._logging.error('Configuration file not found. Verify whether the config.ini file is in the config subdirectory.')
+            self._log.error('Configuration file not found. Verify whether the config.ini file is in the config subdirectory.')
         else:
             # read the connection configurations in the ini file
             config = configparser.ConfigParser()
@@ -42,9 +42,9 @@ class RedditAuthenticator(AuthenticatorInterface):
 
                     self.authenticate()
                 except:
-                    self._logging.error('Reddit keys not found or incorrect. Verify the Reddit section in the config file.')               
+                    self._log.error('Reddit keys not found or incorrect. Verify the Reddit section in the config file.')               
             else:
-                self._logging.error('Reddit section not found. Verify the Reddit section in the config file.')
+                self._log.error('Reddit section not found. Verify the Reddit section in the config file.')
 
     def authenticate(self) -> None:
         api = praw.Reddit(client_id = self._client_id,
