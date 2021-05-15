@@ -35,7 +35,7 @@ class QueryTweets(QueryPostsInterface):
 
         try:
             # query tweets according to the filters
-            tweets = tw.Cursor(self._authenticator.api.search, **twitter_filter.query_params).items(int(twitter_filter.items))
+            tweets = tw.Cursor(self._authenticator.api.search, **twitter_filter.query_params).items(twitter_filter.items)
 
             # create a pandas dataframe with specific columns
             twitter_data = [[tweet.user.screen_name, tweet.user.location] for tweet in tweets]
@@ -62,7 +62,10 @@ class QueryTweets(QueryPostsInterface):
         
         try:
             # query tweets according to the filters
-            tweets = tw.Cursor(self._authenticator.api.user_timeline, user_id = user, **twitter_filter.query_params).items(int(twitter_filter.items))
+            if(twitter_filter.items > 0):
+                tweets = tw.Cursor(self._authenticator.api.user_timeline, user_id = user, **twitter_filter.query_params).items(twitter_filter.items)
+            else:
+                tweets = tw.Cursor(self._authenticator.api.user_timeline, user_id = user, **twitter_filter.query_params).items()
             
             # create a pandas dataframe with specific columns
             twitter_data = [[tweet.text] for tweet in tweets]
@@ -90,7 +93,7 @@ class QueryTweets(QueryPostsInterface):
         try:
             # query tweets according to the filters
             if(twitter_filter.items > 0):
-                tweets = tw.Cursor(self._authenticator.api.favorites, user_id = user, **twitter_filter.query_params).items(int(twitter_filter.items))
+                tweets = tw.Cursor(self._authenticator.api.favorites, user_id = user, **twitter_filter.query_params).items(twitter_filter.items)
             else:
                 tweets = tw.Cursor(self._authenticator.api.favorites, user_id = user, **twitter_filter.query_params).items()
             
@@ -219,9 +222,6 @@ class QueryTweets(QueryPostsInterface):
         for _ in processes_favorites:
             df_process = queue_favorites.get()
             df_favorites = pd.concat([df_favorites, df_process])
-            print('df: ' + str(len(df_process)))
-
-        print('Final df_favorites: ' + str(len(df_favorites)))
 
         final_time_par = time.time() - start_time_par
         self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
