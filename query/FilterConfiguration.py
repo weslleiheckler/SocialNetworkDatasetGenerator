@@ -33,7 +33,8 @@ class FilterConfiguration():
 
                     label = ''
                     filter_type = ''
-                    query = ''
+                    query_params = {}
+                    users = []
 
                     # check whether the section has parameters
                     if not config.items(section):
@@ -47,15 +48,20 @@ class FilterConfiguration():
                             elif(param == 'filter_type'):
                                 # the 'filter_type' parameter is used for choosing the filter method
                                 filter_type = value
+                            elif(param == 'items'):
+                                # the 'items' parameter is used for choosing the number of items selected
+                                items = value
+                            elif(param == 'id'):
+                                # the 'users' parameter is used for passing a list of users to get users' information
+                                users = value.split(',')
                             else:
-                                # build a query string
-                                if query != '': query += ', '
-                                query += param + '=' + value
+                                # build a query params dictionary
+                                query_params[param] = value
 
                         # create a filter and append to list
-                        self.create_filter(key, id, filter_type, query, label)
-                        self._log.user_message(key + ' - ' + id + ' - ' + filter_type + ' - ' + query + ' - ' + label)
+                        self.create_filter(key, id, filter_type, query_params, users, items, label)
+                        self._log.user_message(key + ' - ' + id + ' - ' + filter_type + ' - ' + items + ' - ' + label)
                 
-    def create_filter(self, key, id, filter_type, query, label) -> None:
-        filter = Filter(key, id, filter_type, query, label, self._log)
+    def create_filter(self, key, id, filter_type, query_params, users, items, label) -> None:
+        filter = Filter(key, id, filter_type, query_params, users, items, label, self._log)
         self._list_filters.append(filter)

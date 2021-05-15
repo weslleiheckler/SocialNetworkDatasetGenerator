@@ -1,4 +1,3 @@
-import logging
 from authentication.AuthenticatorInterface import AuthenticatorInterface
 import praw
 import configparser, os
