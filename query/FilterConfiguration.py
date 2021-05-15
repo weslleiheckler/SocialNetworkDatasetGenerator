@@ -33,8 +33,9 @@ class FilterConfiguration():
 
                     label = ''
                     filter_type = ''
-                    query_params = {}
+                    items = 0
                     users = []
+                    query_params = {}
 
                     # check whether the section has parameters
                     if not config.items(section):
@@ -60,7 +61,7 @@ class FilterConfiguration():
 
                         # create a filter and append to list
                         self.create_filter(key, id, filter_type, query_params, users, items, label)
-                        self._log.user_message(key + ' - ' + id + ' - ' + filter_type + ' - ' + items + ' - ' + label)
+                        self._log.user_message(key + ' - ' + id + ' - ' + filter_type + ' - ' + str(items) + ' - ' + label)
                 
     def create_filter(self, key, id, filter_type, query_params, users, items, label) -> None:
         filter = Filter(key, id, filter_type, query_params, users, items, label, self._log)

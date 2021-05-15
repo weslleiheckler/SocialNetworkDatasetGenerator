@@ -32,7 +32,7 @@ class Filter():
     
     @property
     def items(self):
-        return self._items  
+        return int(self._items)
 
     @property
     def label(self):

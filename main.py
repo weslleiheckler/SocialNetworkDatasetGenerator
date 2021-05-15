@@ -9,7 +9,7 @@ class Main():
     def main():
 
         # create a logger
-        logging = log.Logging(user_messages=False,timer_messages=True)
+        logging = log.Logging(user_messages=True,timer_messages=True)
 
         # Twitter connection
         twitter_conn = tt.TwitterAuthenticator(logging)

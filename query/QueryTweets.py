@@ -30,7 +30,7 @@ class QueryTweets(QueryPostsInterface):
             # query tweets sequentially
             self.query_sequential(list_twitter_filters)
     
-    def query(self, twitter_filter) -> None:
+    def query(self, twitter_filter) -> pd.DataFrame:
         df = pd.DataFrame()
 
         try:
@@ -38,8 +38,8 @@ class QueryTweets(QueryPostsInterface):
             tweets = tw.Cursor(self._authenticator.api.search, **twitter_filter.query_params).items(int(twitter_filter.items))
 
             # create a pandas dataframe with specific columns
-            tt_data = [[tweet.user.screen_name, tweet.user.location] for tweet in tweets]
-            df = pd.DataFrame(data=tt_data, columns=['user', 'location'])
+            twitter_data = [[tweet.user.screen_name, tweet.user.location] for tweet in tweets]
+            df = pd.DataFrame(data=twitter_data, columns=['user', 'location'])
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):
@@ -57,16 +57,16 @@ class QueryTweets(QueryPostsInterface):
         # put the pandas dataframe in the queue 
         queue.put(df)
 
-    def query_timeline(self, user, twitter_filter) -> None:
+    def query_timeline(self, user, twitter_filter) -> pd.DataFrame:
         df = pd.DataFrame()
         
         try:
             # query tweets according to the filters
-            tweets = tw.Cursor(self._authenticator.api.user_timeline, id = user, **twitter_filter.query_params).items(int(twitter_filter.items))
+            tweets = tw.Cursor(self._authenticator.api.user_timeline, user_id = user, **twitter_filter.query_params).items(int(twitter_filter.items))
             
             # create a pandas dataframe with specific columns
-            tt_data = [[tweet.text] for tweet in tweets]
-            df = pd.DataFrame(data=tt_data, columns=['text'])
+            twitter_data = [[tweet.text] for tweet in tweets]
+            df = pd.DataFrame(data=twitter_data, columns=['text'])
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):
@@ -84,12 +84,42 @@ class QueryTweets(QueryPostsInterface):
         # put the pandas dataframe in the queue 
         queue.put(df)
 
+    def query_favorites(self, user, twitter_filter) -> pd.DataFrame:
+        df = pd.DataFrame()
+
+        try:
+            # query tweets according to the filters
+            if(twitter_filter.items > 0):
+                tweets = tw.Cursor(self._authenticator.api.favorites, user_id = user, **twitter_filter.query_params).items(int(twitter_filter.items))
+            else:
+                tweets = tw.Cursor(self._authenticator.api.favorites, user_id = user, **twitter_filter.query_params).items()
+            
+            # create a pandas dataframe with specific columns
+            twitter_data = [[tweet.text] for tweet in tweets]
+            df = pd.DataFrame(data=twitter_data, columns=['text'])
+
+            # create a column with the value from the 'label' filter parameter
+            if(twitter_filter.label is not None):
+                df['label'] = twitter_filter.label
+        except:
+            self._log.exception('Fail to query favorites from users.')
+
+        return df
+
+    def query_favorites_par(self, user, twitter_filter, queue) -> None:
+        # call query_favorites function to query tweets and create a dataframe
+        df = self.query_favorites(user, twitter_filter)
+
+        # put the pandas dataframe in the queue 
+        queue.put(df)
+
     def query_sequential(self, list_filters) -> None:
         start_time_seq = time.time()
 
         # separate filters by type
         search_filters = list(filter(lambda x: (x.filter_type == 'search'), list_filters))
         user_timeline_filters = list(filter(lambda x: (x.filter_type == 'user_timeline'), list_filters))
+        favorites_filters = list(filter(lambda x: (x.filter_type == 'favorites'), list_filters))
 
         # for each filter, create a query of tweets 
         # concatenate all dataframes of search information
@@ -110,6 +140,16 @@ class QueryTweets(QueryPostsInterface):
 
         self._log.user_message('Timeline query finished.')
 
+        # for each user id from each filter, create a query of tweets
+        # concatenate all dataframes of favorites information
+        df_favorites = pd.DataFrame()
+        for fav in favorites_filters:
+            for user in fav.users:
+                df_filter = self.query_favorites(user, fav)
+                df_favorites = pd.concat([df_favorites, df_filter])
+
+        self._log.user_message('Favorites query finished.')
+
         final_time_seq = time.time() - start_time_seq
         self._log.timer_message('Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
 
@@ -119,10 +159,12 @@ class QueryTweets(QueryPostsInterface):
         # separate filters by type
         search_filters = list(filter(lambda x: (x.filter_type == 'search'), list_filters))
         user_timeline_filters = list(filter(lambda x: (x.filter_type == 'user_timeline'), list_filters))
+        favorites_filters = list(filter(lambda x: (x.filter_type == 'favorites'), list_filters))
         
         # configure queues
         queue_search = Queue()
         queue_user_timeline = Queue()
+        queue_favorites = Queue()
 
         # for each filter, create a parallelized query of tweets
         processes_search = [Process(target=self.query_par, args=(sf, queue_search)) for sf in search_filters]
@@ -131,6 +173,11 @@ class QueryTweets(QueryPostsInterface):
         for utf in user_timeline_filters:
             processes_user_timeline = [Process(target=self.query_timeline_par, args=(user, utf, queue_user_timeline)) for user in utf.users]
 
+        # for each user id from each filter, create a parallelized query of tweets
+        processes_favorites = []
+        for fav in favorites_filters:
+            processes_favorites.extend([Process(target=self.query_favorites_par, args=(user, fav, queue_favorites)) for user in fav.users])
+
         # start the processes
         for p in processes_search:
             p.start()
@@ -138,11 +185,17 @@ class QueryTweets(QueryPostsInterface):
         for p in processes_user_timeline:
             p.start()
 
+        for p in processes_favorites:
+            p.start()
+
         # wait the processes
         for p in processes_search:
             p.join()
 
         for p in processes_user_timeline:
+            p.join()
+
+        for p in processes_favorites:
             p.join()
 
         # concatenate all dataframes of search information
@@ -160,6 +213,15 @@ class QueryTweets(QueryPostsInterface):
             df_user_timeline = pd.concat([df_user_timeline, df_process])
 
         self._log.user_message('Timeline query finished.')
+
+        # concatenate all dataframes of favorites information
+        df_favorites = pd.DataFrame() # dataframe to store all information from this filter type
+        for _ in processes_favorites:
+            df_process = queue_favorites.get()
+            df_favorites = pd.concat([df_favorites, df_process])
+            print('df: ' + str(len(df_process)))
+
+        print('Final df_favorites: ' + str(len(df_favorites)))
 
         final_time_par = time.time() - start_time_par
         self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
