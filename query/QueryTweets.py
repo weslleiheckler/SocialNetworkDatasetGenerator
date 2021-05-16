@@ -12,23 +12,11 @@ class QueryTweets(QueryPostsInterface):
         self._list_filters = list_filters
         self._parallelize = parallelize
         self._log = log
-        self._list_df_posts = None
+        self._dict_df_posts = {}
 
     @property
-    def list_df_posts(self):
-        return self._list_df_posts
-
-    def query_manager(self) -> None:
-        # select only the Twitter filters
-        list_twitter_filters = list(filter(lambda x: (x.key == 'Twitter'), self._list_filters))
-
-        # both methods perform the same task using a parallel or sequential strategy
-        if(self._parallelize):
-            # query tweets parallelized
-            self.query_parallel(list_twitter_filters)
-        else:
-            # query tweets sequentially
-            self.query_sequential(list_twitter_filters)
+    def dict_df_posts(self):
+        return self._dict_df_posts
     
     def query(self, twitter_filter) -> pd.DataFrame:
         df = pd.DataFrame()
@@ -116,6 +104,18 @@ class QueryTweets(QueryPostsInterface):
         # put the pandas dataframe in the queue 
         queue.put(df)
 
+    def query_manager(self) -> None:
+        # select only the Twitter filters
+        list_twitter_filters = list(filter(lambda x: (x.key == 'Twitter'), self._list_filters))
+
+        # both methods perform the same task using a parallel or sequential strategy
+        if(self._parallelize):
+            # query tweets parallelized
+            self.query_parallel(list_twitter_filters)
+        else:
+            # query tweets sequentially
+            self.query_sequential(list_twitter_filters)
+
     def query_sequential(self, list_filters) -> None:
         start_time_seq = time.time()
 
@@ -130,7 +130,8 @@ class QueryTweets(QueryPostsInterface):
         for sf in search_filters:
             df_filter = self.query(sf)
             df_search = pd.concat([df_search, df_filter])
-
+        
+        self._dict_df_posts['search'] = df_search
         self._log.user_message('Tweets query finished.')
 
         # for each user id from each filter, create a query of tweets
@@ -141,6 +142,7 @@ class QueryTweets(QueryPostsInterface):
                 df_filter = self.query_timeline(user, utf)
                 df_user_timeline = pd.concat([df_user_timeline, df_filter])
 
+        self._dict_df_posts['user_timeline'] = df_user_timeline
         self._log.user_message('Timeline query finished.')
 
         # for each user id from each filter, create a query of tweets
@@ -151,6 +153,7 @@ class QueryTweets(QueryPostsInterface):
                 df_filter = self.query_favorites(user, fav)
                 df_favorites = pd.concat([df_favorites, df_filter])
 
+        self._dict_df_posts['favorites'] = df_favorites
         self._log.user_message('Favorites query finished.')
 
         final_time_seq = time.time() - start_time_seq
@@ -208,6 +211,7 @@ class QueryTweets(QueryPostsInterface):
             df_process = queue_search.get()
             df_search = pd.concat([df_search, df_process])
 
+        self._dict_df_posts['search'] = df_search
         self._log.user_message('Tweets query finished.')
 
         # concatenate all dataframes of user_timeline information
@@ -216,6 +220,7 @@ class QueryTweets(QueryPostsInterface):
             df_process = queue_user_timeline.get()
             df_user_timeline = pd.concat([df_user_timeline, df_process])
 
+        self._dict_df_posts['user_timeline'] = df_user_timeline
         self._log.user_message('Timeline query finished.')
 
         # concatenate all dataframes of favorites information
@@ -223,6 +228,9 @@ class QueryTweets(QueryPostsInterface):
         for _ in processes_favorites:
             df_process = queue_favorites.get()
             df_favorites = pd.concat([df_favorites, df_process])
+
+        self._dict_df_posts['favorites'] = df_favorites
+        self._log.user_message('Favorites query finished.')
 
         final_time_par = time.time() - start_time_par
         self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
