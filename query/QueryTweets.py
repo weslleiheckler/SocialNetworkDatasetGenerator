@@ -173,8 +173,9 @@ class QueryTweets(QueryPostsInterface):
         processes_search = [Process(target=self.query_par, args=(sf, queue_search)) for sf in search_filters]
 
         # for each user id from each filter, create a parallelized query of tweets
+        processes_user_timeline = []
         for utf in user_timeline_filters:
-            processes_user_timeline = [Process(target=self.query_timeline_par, args=(user, utf, queue_user_timeline)) for user in utf.users]
+            processes_user_timeline.extend([Process(target=self.query_timeline_par, args=(user, utf, queue_user_timeline)) for user in utf.users])
 
         # for each user id from each filter, create a parallelized query of tweets
         processes_favorites = []
