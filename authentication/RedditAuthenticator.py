@@ -47,7 +47,7 @@ class RedditAuthenticator(AuthenticatorInterface):
                 self._log.error('Reddit section not found. Verify the Reddit section in the config file.')
 
     def authenticate(self) -> None:
-        api = praw.Reddit(client_id = self._client_id,
+        self._api = praw.Reddit(client_id = self._client_id,
                             client_secret = self._client_secret,
                             user_agent = self._user_agent, 
                             username = self._username,

@@ -1,5 +1,5 @@
 from query.QueryPostsInterface import QueryPostsInterface
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, process
 import time
 import tweepy as tw
 import pandas as pd
@@ -185,24 +185,15 @@ class QueryTweets(QueryPostsInterface):
         for fav in favorites_filters:
             processes_favorites.extend([Process(target=self.query_favorites_par, args=(user, fav, queue_favorites)) for user in fav.users])
 
+        processes = []
+        processes.extend(processes_search + processes_user_timeline + processes_favorites)
+
         # start the processes
-        for p in processes_search:
-            p.start()
-
-        for p in processes_user_timeline:
-            p.start()
-
-        for p in processes_favorites:
+        for p in processes:
             p.start()
 
         # wait the processes
-        for p in processes_search:
-            p.join()
-
-        for p in processes_user_timeline:
-            p.join()
-
-        for p in processes_favorites:
+        for p in processes:
             p.join()
 
         # concatenate all dataframes of search information
