@@ -19,33 +19,69 @@ class QueryRedditPosts(QueryPostsInterface):
     def dict_df_posts(self):
         return self._dict_df_posts
 
+    @dict_df_posts.setter
+    def dict_df_posts(self, key, df):
+        if(len(df) > 0):
+            self._dict_df_posts[key] = df
+
     def get_date(self, post_date):
         return dt.datetime.fromtimestamp(post_date)
 
     def create_dataframe_posts(self, list_posts, reddit_filter) -> pd.DataFrame:
         
-        posts_dict = {'title': [],       # title of the post
-                        'score': [],     # score of the post
-                        'id': [],        # unique id of the post
-                        'url': [],       # url of the post          
-                        'comms_num': [], # the number of comments on the post
-                        'created': [],   # timestamp of the post
-                        'body': []}      # the description of the post
+        posts_dict = {'title': [],       
+                        'score': [],   
+                        'ups': [],
+                        'downs': [],
+                        'id': [],        
+                        'url': [],               
+                        'created': [],   
+                        'body': [],
+                        'subreddit': [],
+                        'category': [],
+                        'quarantine': [],
+                        'num_comments': [],
+                        'num_duplicates': [],
+                        'num_reports': [],
+                        'num_crossposts': [],
+                        'over_18': [],
+                        'is_original_content': [],
+                        'is_video': [],
+                        'edited': [],
+                        'archived': [],
+                        'author_name': [],
+                        'author_fullname': []
+                        }  
 
-        comments_dict = {'comment_id': [],            # unique comm id
-                            'comment_parent_id': [],  # comment parent id
-                            'comment_body': [],       # text in comment
-                            'comment_link_id': []}    # link to the comment
+        comments_dict = {'comment_id': [],
+                            'comment_parent_id': [],
+                            'comment_body': [],       
+                            'comment_link_id': []} 
 
         # create a dictionary with posts information
         for post in list_posts:
             posts_dict['title'].append(post.title)
             posts_dict['score'].append(post.score)
+            posts_dict['ups'].append(post.ups)
+            posts_dict['downs'].append(post.downs)
             posts_dict['id'].append(post.id)
             posts_dict['url'].append(post.url)
-            posts_dict['comms_num'].append(post.num_comments)
             posts_dict['created'].append(post.created)
-            posts_dict['body'].append(post.selftext)
+            posts_dict['text'].append(post.selftext)
+            posts_dict['subreddit'].append(post.subreddit)
+            posts_dict['category'].append(post.category)
+            posts_dict['quarantine'].append(post.quarantine)
+            posts_dict['num_comments'].append(post.num_comments)
+            posts_dict['num_duplicates'].append(post.num_duplicates)
+            posts_dict['num_reports'].append(post.num_reports)
+            posts_dict['num_crossposts'].append(post.num_crossposts)            
+            posts_dict['over_18'].append(post.over_18)
+            posts_dict['is_original_content'].append(post.is_original_content)
+            posts_dict['is_video'].append(post.is_video)
+            posts_dict['edited'].append(post.edited)
+            posts_dict['archived'].append(post.archived)
+            posts_dict['author_name'].append(post.author.name)
+            posts_dict['author_fullname'].append(post.author.fullname)
 
             # create a dictionary with comments information
             if(reddit_filter.comments):
@@ -62,7 +98,7 @@ class QueryRedditPosts(QueryPostsInterface):
                 for comment in list_comments:
                     comments_dict['comment_id'].append(comment.id)
                     comments_dict['comment_parent_id'].append(comment.parent_id)
-                    comments_dict['comment_body'].append(comment.body)
+                    comments_dict['text'].append(comment.body)
                     comments_dict['comment_link_id'].append(comment.link_id)
             
         # create the dataframes with posts and comments information
@@ -170,11 +206,9 @@ class QueryRedditPosts(QueryPostsInterface):
                 df_posts, df_comments = self.query(sf, subreddit)
                 df_search_posts = pd.concat([df_search_posts, df_posts])
                 df_search_comments = pd.concat([df_search_comments, df_comments])
-                print('len posts: ' + str(len(df_posts)))
-                print('len comments: ' + str(len(df_comments)))
 
-        self._dict_df_posts['search_posts'] = df_search_posts
-        self._dict_df_posts['search_comments'] = df_search_comments
+        self.dict_df_posts('search_posts', df_search_posts)
+        self.dict_df_posts('search_comments', df_search_comments)
         self._log.user_message('Reddit posts'' query finished.')
 
         # for each subreddit from each filter, create a query of posts
@@ -186,11 +220,9 @@ class QueryRedditPosts(QueryPostsInterface):
                 df_posts, df_comments = self.query(tf, subreddit)
                 df_top_posts = pd.concat([df_top_posts, df_posts])
                 df_top_comments = pd.concat([df_top_comments, df_comments])
-                print('len posts: ' + str(len(df_posts)))
-                print('len comments: ' + str(len(df_comments)))
 
-        self._dict_df_posts['top_posts'] = df_top_posts
-        self._dict_df_posts['top_comments'] = df_top_comments
+        self.dict_df_posts('top_posts', df_top_posts)
+        self.dict_df_posts('top_comments', df_top_comments)
         self._log.user_message('Reddit top posts'' query finished.')
 
         # for each subreddit from each filter, create a query of posts
@@ -202,11 +234,9 @@ class QueryRedditPosts(QueryPostsInterface):
                 df_posts, df_comments = self.query(hf, subreddit)
                 df_hot_posts = pd.concat([df_hot_posts, df_posts])
                 df_hot_comments = pd.concat([df_hot_comments, df_comments])
-                print('len posts: ' + str(len(df_posts)))
-                print('len comments: ' + str(len(df_comments)))
 
-        self._dict_df_posts['hot_posts'] = df_hot_posts
-        self._dict_df_posts['hot_comments'] = df_hot_comments
+        self.dict_df_posts('hot_posts', df_hot_posts)
+        self.dict_df_posts('hot_comments', df_hot_comments)
         self._log.user_message('Reddit hot posts'' query finished.')
 
         # for each subreddit from each filter, create a query of posts
@@ -218,11 +248,9 @@ class QueryRedditPosts(QueryPostsInterface):
                 df_posts, df_comments = self.query(nf, subreddit)
                 df_new_posts = pd.concat([df_new_posts, df_posts])
                 df_new_comments = pd.concat([df_new_comments, df_comments])
-                print('len posts: ' + str(len(df_posts)))
-                print('len comments: ' + str(len(df_comments)))
 
-        self._dict_df_posts['new_posts'] = df_new_posts
-        self._dict_df_posts['new_comments'] = df_new_comments
+        self.dict_df_posts('new_posts', df_new_posts)
+        self.dict_df_posts('new_comments', df_new_comments)
         self._log.user_message('Reddit new posts'' query finished.')
 
         # for each subreddit from each filter, create a query of posts
@@ -234,11 +262,9 @@ class QueryRedditPosts(QueryPostsInterface):
                 df_posts, df_comments = self.query(cf, subreddit)
                 df_controversial_posts = pd.concat([df_controversial_posts, df_posts])
                 df_controversial_comments = pd.concat([df_controversial_comments, df_comments])
-                print('len posts: ' + str(len(df_posts)))
-                print('len comments: ' + str(len(df_comments)))
 
-        self._dict_df_posts['controversial_posts'] = df_controversial_posts
-        self._dict_df_posts['controversial_comments'] = df_controversial_comments
+        self.dict_df_posts('controversial_posts', df_controversial_posts)
+        self.dict_df_posts('controversial_comments', df_controversial_comments)
         self._log.user_message('Reddit controversial posts'' query finished.')
 
         # for each subreddit from each filter, create a query of posts
@@ -250,11 +276,9 @@ class QueryRedditPosts(QueryPostsInterface):
                 df_posts, df_comments = self.query(gf, subreddit)
                 df_gilded_posts = pd.concat([df_gilded_posts, df_posts])
                 df_gilded_comments = pd.concat([df_gilded_comments, df_comments])
-                print('len posts: ' + str(len(df_posts)))
-                print('len comments: ' + str(len(df_comments)))
 
-        self._dict_df_posts['gilded_posts'] = df_gilded_posts
-        self._dict_df_posts['gilded_comments'] = df_gilded_comments
+        self.dict_df_posts('gilded_posts', df_gilded_posts)
+        self.dict_df_posts('gilded_comments', df_gilded_comments)
         self._log.user_message('Reddit gilded posts'' query finished.')
 
         final_time_seq = time.time() - start_time_seq
@@ -322,10 +346,6 @@ class QueryRedditPosts(QueryPostsInterface):
         for p in processes:
             p.start()
 
-        # wait the processes
-        for p in processes:
-            p.join()
-
         # concatenate all dataframes of search information
         df_search_posts = pd.DataFrame() 
         df_search_comments = pd.DataFrame()
@@ -334,11 +354,9 @@ class QueryRedditPosts(QueryPostsInterface):
             df_process_comments = queue_search.get()
             df_search_posts = pd.concat([df_search_posts, df_process_posts])
             df_search_comments = pd.concat([df_search_comments, df_process_comments])
-            print('len posts: ' + str(len(df_process_posts)))
-            print('len comments: ' + str(len(df_process_comments)))
 
-        self._dict_df_posts['search_posts'] = df_search_posts
-        self._dict_df_posts['search_comments'] = df_search_comments
+        self.dict_df_posts('search_posts', df_search_posts)
+        self.dict_df_posts('search_comments', df_search_comments)
         self._log.user_message('Reddit posts'' query finished.')
 
         # concatenate all dataframes of search information
@@ -349,11 +367,9 @@ class QueryRedditPosts(QueryPostsInterface):
             df_process_comments = queue_top.get()
             df_top_posts = pd.concat([df_top_posts, df_process_posts])
             df_top_comments = pd.concat([df_top_comments, df_process_comments])
-            print('len posts: ' + str(len(df_process_posts)))
-            print('len comments: ' + str(len(df_process_comments)))
 
-        self._dict_df_posts['top_posts'] = df_top_posts
-        self._dict_df_posts['top_comments'] = df_top_comments
+        self.dict_df_posts('top_posts', df_top_posts)
+        self.dict_df_posts('top_comments', df_top_comments)
         self._log.user_message('Reddit top posts'' query finished.')
 
         # concatenate all dataframes of search information
@@ -364,11 +380,9 @@ class QueryRedditPosts(QueryPostsInterface):
             df_process_comments = queue_hot.get()
             df_hot_posts = pd.concat([df_hot_posts, df_process_posts])
             df_hot_comments = pd.concat([df_hot_comments, df_process_comments])
-            print('len posts: ' + str(len(df_process_posts)))
-            print('len comments: ' + str(len(df_process_comments)))
 
-        self._dict_df_posts['hot_posts'] = df_hot_posts
-        self._dict_df_posts['hot_comments'] = df_hot_comments
+        self.dict_df_posts('hot_posts', df_hot_posts)
+        self.dict_df_posts('hot_comments', df_hot_comments)
         self._log.user_message('Reddit hot posts'' query finished.')
 
         # concatenate all dataframes of search information
@@ -379,11 +393,9 @@ class QueryRedditPosts(QueryPostsInterface):
             df_process_comments = queue_new.get()
             df_new_posts = pd.concat([df_new_posts, df_process_posts])
             df_new_comments = pd.concat([df_new_comments, df_process_comments])
-            print('len posts: ' + str(len(df_process_posts)))
-            print('len comments: ' + str(len(df_process_comments)))
 
-        self._dict_df_posts['new_posts'] = df_new_posts
-        self._dict_df_posts['new_comments'] = df_new_comments
+        self.dict_df_posts('new_posts', df_new_posts)
+        self.dict_df_posts('new_comments', df_new_comments)
         self._log.user_message('Reddit new posts'' query finished.')
 
         # concatenate all dataframes of search information
@@ -394,11 +406,9 @@ class QueryRedditPosts(QueryPostsInterface):
             df_process_comments = queue_controversial.get()
             df_controversial_posts = pd.concat([df_controversial_posts, df_process_posts])
             df_controversial_comments = pd.concat([df_controversial_comments, df_process_comments])
-            print('len posts: ' + str(len(df_process_posts)))
-            print('len comments: ' + str(len(df_process_comments)))
 
-        self._dict_df_posts['controversial_posts'] = df_controversial_posts
-        self._dict_df_posts['controversial_comments'] = df_controversial_comments
+        self.dict_df_posts('controversial_posts', df_controversial_posts)
+        self.dict_df_posts('controversial_comments', df_controversial_comments)
         self._log.user_message('Reddit posts'' query finished.')
 
         # concatenate all dataframes of search information
@@ -409,12 +419,14 @@ class QueryRedditPosts(QueryPostsInterface):
             df_process_comments = queue_gilded.get()
             df_gilded_posts = pd.concat([df_gilded_posts, df_process_posts])
             df_gilded_comments = pd.concat([df_gilded_comments, df_process_comments])
-            print('len posts: ' + str(len(df_process_posts)))
-            print('len comments: ' + str(len(df_process_comments)))
 
-        self._dict_df_posts['gilded_posts'] = df_gilded_posts
-        self._dict_df_posts['gilded_comments'] = df_gilded_comments
+        self.dict_df_posts('gilded_posts', df_gilded_posts)
+        self.dict_df_posts('gilded_comments', df_gilded_comments)
         self._log.user_message('Reddit posts'' query finished.')
 
         final_time_par = time.time() - start_time_par
         self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+
+        # wait the processes
+        for p in processes:
+            p.join()

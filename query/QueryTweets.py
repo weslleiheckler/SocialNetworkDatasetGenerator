@@ -1,5 +1,5 @@
 from query.QueryPostsInterface import QueryPostsInterface
-from multiprocessing import Process, Queue, process
+from multiprocessing import Process, Queue
 import time
 import tweepy as tw
 import pandas as pd
@@ -12,11 +12,15 @@ class QueryTweets(QueryPostsInterface):
         self._list_filters = list_filters
         self._parallelize = parallelize
         self._log = log
-        self._dict_df_posts = {}
+        self._set_dict_df_posts = {}
 
     @property
     def dict_df_posts(self):
-        return self._dict_df_posts
+        return self._set_dict_df_posts
+
+    def set_dict_df_posts(self, key, df):
+        if(len(df) > 0):
+            self._set_dict_df_posts[key] = df
     
     def query(self, twitter_filter) -> pd.DataFrame:
         df = pd.DataFrame()
@@ -26,8 +30,67 @@ class QueryTweets(QueryPostsInterface):
             tweets = tw.Cursor(self._authenticator.api.search, **twitter_filter.query_params).items(twitter_filter.items)
 
             # create a pandas dataframe with specific columns
-            twitter_data = [[tweet.user.screen_name, tweet.user.location] for tweet in tweets]
-            df = pd.DataFrame(data=twitter_data, columns=['user', 'location'])
+            twitter_data = [[tweet.id,   
+                             tweet.created_at,
+                             tweet.text,
+                             tweet.in_reply_to_status_id,
+                             tweet.in_reply_to_user_id,
+                             tweet.in_reply_to_screen_name,
+                             tweet.geo,
+                             tweet.coordinates,
+                             tweet.place,
+                             tweet.is_quote_status,
+                             tweet.retweet_count,
+                             tweet.favorite_count,
+                             tweet.lang,
+                             tweet.user.id,
+                             tweet.user.name,
+                             tweet.user.screen_name, 
+                             tweet.user.location,
+                             tweet.user.followers_count,
+                             tweet.user.friends_count,
+                             tweet.user.listed_count,
+                             tweet.user.created_at,
+                             tweet.user.favourites_count,
+                             tweet.user.time_zone,
+                             tweet.user.verified,
+                             tweet.user.lang,
+                             tweet.user.profile_background_image_url_https,
+                             tweet.user.profile_image_url_https,
+                             tweet.user.default_profile,
+                             tweet.user.default_profile_image] 
+                             for tweet in tweets]
+
+            df = pd.DataFrame(data=twitter_data, 
+                                columns=['id',
+                                         'created_at',
+                                         'text',
+                                         'in_reply_to_status_id',
+                                         'in_reply_to_user_id',
+                                         'in_reply_to_screen_name',
+                                         'geo',
+                                         'coordinates',
+                                         'place',
+                                         'is_quote_status',
+                                         'retweet_count',
+                                         'favorite_count',
+                                         'lang',
+                                         'user_id',
+                                         'user_name',
+                                         'user_screen_name', 
+                                         'user_location',
+                                         'user_followers_count',
+                                         'user_friends_count',
+                                         'user_listed_count',
+                                         'user_created_at',
+                                         'user_favourites_count',
+                                         'user_time_zone',
+                                         'user_verified',
+                                         'user_lang',
+                                         'user_profile_background_image_url_https',
+                                         'user_profile_image_url_https',
+                                         'user_default_profile',
+                                         'user_default_profile_image'])
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):
@@ -56,8 +119,67 @@ class QueryTweets(QueryPostsInterface):
                 tweets = tw.Cursor(self._authenticator.api.user_timeline, user_id = user, **twitter_filter.query_params).items()
             
             # create a pandas dataframe with specific columns
-            twitter_data = [[tweet.text] for tweet in tweets]
-            df = pd.DataFrame(data=twitter_data, columns=['text'])
+            twitter_data = [[tweet.id,
+                             tweet.created_at,
+                             tweet.text,
+                             tweet.in_reply_to_status_id,
+                             tweet.in_reply_to_user_id,
+                             tweet.in_reply_to_screen_name,
+                             tweet.geo,
+                             tweet.coordinates,
+                             tweet.place,
+                             tweet.is_quote_status,
+                             tweet.retweet_count,
+                             tweet.favorite_count,
+                             tweet.lang,
+                             tweet.user.id,
+                             tweet.user.name,
+                             tweet.user.screen_name,
+                             tweet.user.location,
+                             tweet.user.followers_count,
+                             tweet.user.friends_count,
+                             tweet.user.listed_count,
+                             tweet.user.created_at,
+                             tweet.user.favourites_count,
+                             tweet.user.time_zone,
+                             tweet.user.verified,
+                             tweet.user.lang,
+                             tweet.user.profile_background_image_url_https,
+                             tweet.user.profile_image_url_https,
+                             tweet.user.default_profile,
+                             tweet.user.default_profile_image]  
+                             for tweet in tweets]
+
+            df = pd.DataFrame(data=twitter_data, 
+                                columns=['id',
+                                         'created_at',
+                                         'text',
+                                         'in_reply_to_status_id',
+                                         'in_reply_to_user_id',
+                                         'in_reply_to_screen_name',
+                                         'geo',
+                                         'coordinates',
+                                         'place',
+                                         'is_quote_status',
+                                         'retweet_count',
+                                         'favorite_count',
+                                         'lang',
+                                         'user_id',
+                                         'user_name',
+                                         'user_screen_name',
+                                         'user_location',
+                                         'user_followers_count',
+                                         'user_friends_count',
+                                         'user_listed_count',
+                                         'user_created_at',
+                                         'user_favourites_count',
+                                         'user_time_zone',
+                                         'user_verified',
+                                         'user_lang',
+                                         'user_profile_background_image_url_https',
+                                         'user_profile_image_url_https',
+                                         'user_default_profile',
+                                         'user_default_profile_image'])
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):
@@ -86,8 +208,67 @@ class QueryTweets(QueryPostsInterface):
                 tweets = tw.Cursor(self._authenticator.api.favorites, user_id = user, **twitter_filter.query_params).items()
             
             # create a pandas dataframe with specific columns
-            twitter_data = [[tweet.text] for tweet in tweets]
-            df = pd.DataFrame(data=twitter_data, columns=['text'])
+            twitter_data = [[tweet.id,
+                             tweet.created_at,
+                             tweet.text,
+                             tweet.in_reply_to_status_id,
+                             tweet.in_reply_to_user_id,
+                             tweet.in_reply_to_screen_name,
+                             tweet.geo,
+                             tweet.coordinates,
+                             tweet.place,
+                             tweet.is_quote_status,
+                             tweet.retweet_count,
+                             tweet.favorite_count,
+                             tweet.lang,
+                             tweet.user.id,
+                             tweet.user.name,
+                             tweet.user.screen_name,
+                             tweet.user.location,
+                             tweet.user.followers_count,
+                             tweet.user.friends_count,
+                             tweet.user.listed_count,
+                             tweet.user.created_at,
+                             tweet.user.favourites_count,
+                             tweet.user.time_zone,
+                             tweet.user.verified,
+                             tweet.user.lang,
+                             tweet.user.profile_background_image_url_https,
+                             tweet.user.profile_image_url_https,
+                             tweet.user.default_profile,
+                             tweet.user.default_profile_image] 
+                             for tweet in tweets]
+                             
+            df = pd.DataFrame(data=twitter_data, 
+                              columns=['id',
+                                       'created_at',
+                                       'text',
+                                       'in_reply_to_status_id',
+                                       'in_reply_to_user_id',
+                                       'in_reply_to_screen_name',
+                                       'geo',
+                                       'coordinates',
+                                       'place',
+                                       'is_quote_status',
+                                       'retweet_count',
+                                       'favorite_count',
+                                       'lang',
+                                       'user_id',
+                                       'user_name',
+                                       'user_screen_name',
+                                       'user_location',
+                                       'user_followers_count',
+                                       'user_friends_count',
+                                       'user_listed_count',
+                                       'user_created_at',
+                                       'user_favourites_count',
+                                       'user_time_zone',
+                                       'user_verified',
+                                       'user_lang',
+                                       'user_profile_background_image_url_https',
+                                       'user_profile_image_url_https',
+                                       'user_default_profile',
+                                       'user_default_profile_image'])
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):
@@ -131,7 +312,7 @@ class QueryTweets(QueryPostsInterface):
             df_filter = self.query(sf)
             df_search = pd.concat([df_search, df_filter])
         
-        self._dict_df_posts['search'] = df_search
+        self.set_dict_df_posts('search', df_search)
         self._log.user_message('Tweets query finished.')
 
         # for each user id from each filter, create a query of tweets
@@ -142,7 +323,7 @@ class QueryTweets(QueryPostsInterface):
                 df_filter = self.query_timeline(user, utf)
                 df_user_timeline = pd.concat([df_user_timeline, df_filter])
 
-        self._dict_df_posts['user_timeline'] = df_user_timeline
+        self.set_dict_df_posts('user_timeline', df_user_timeline)
         self._log.user_message('Timeline query finished.')
 
         # for each user id from each filter, create a query of tweets
@@ -153,7 +334,7 @@ class QueryTweets(QueryPostsInterface):
                 df_filter = self.query_favorites(user, fav)
                 df_favorites = pd.concat([df_favorites, df_filter])
 
-        self._dict_df_posts['favorites'] = df_favorites
+        self.set_dict_df_posts('favorites', df_favorites)
         self._log.user_message('Favorites query finished.')
 
         final_time_seq = time.time() - start_time_seq
@@ -192,17 +373,13 @@ class QueryTweets(QueryPostsInterface):
         for p in processes:
             p.start()
 
-        # wait the processes
-        for p in processes:
-            p.join()
-
         # concatenate all dataframes of search information
         df_search = pd.DataFrame() # dataframe to store all information from this filter type
         for _ in processes_search:
             df_process = queue_search.get()
             df_search = pd.concat([df_search, df_process])
 
-        self._dict_df_posts['search'] = df_search
+        self.set_dict_df_posts('search', df_search)
         self._log.user_message('Tweets query finished.')
 
         # concatenate all dataframes of user_timeline information
@@ -211,7 +388,7 @@ class QueryTweets(QueryPostsInterface):
             df_process = queue_user_timeline.get()
             df_user_timeline = pd.concat([df_user_timeline, df_process])
 
-        self._dict_df_posts['user_timeline'] = df_user_timeline
+        self.set_dict_df_posts('user_timeline', df_user_timeline)
         self._log.user_message('Timeline query finished.')
 
         # concatenate all dataframes of favorites information
@@ -220,8 +397,12 @@ class QueryTweets(QueryPostsInterface):
             df_process = queue_favorites.get()
             df_favorites = pd.concat([df_favorites, df_process])
 
-        self._dict_df_posts['favorites'] = df_favorites
+        self.set_dict_df_posts('favorites', df_favorites)
         self._log.user_message('Favorites query finished.')
 
         final_time_par = time.time() - start_time_par
         self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+
+        # wait the processes
+        for p in processes:
+            p.join()
