@@ -28,8 +28,8 @@ class Main():
         tt_query = qt.QueryTweets(twitter_conn, filter_conf.list_filters, True, logging)
         tt_query.query_manager()
 
-        #rt_query = qr.QueryRedditPosts(reddit_conn, filter_conf.list_filters, True, logging)
-        #rt_query.query_manager()
+        rt_query = qr.QueryRedditPosts(reddit_conn, filter_conf.list_filters, True, logging)
+        rt_query.query_manager()
 
         pp_config = pc.PreprocessingConfiguration(logging)
         pp_config.config()

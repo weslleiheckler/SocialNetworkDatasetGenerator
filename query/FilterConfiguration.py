@@ -37,6 +37,7 @@ class FilterConfiguration():
                     comments = False
                     comments_limit = 0
                     comments_items = 0
+                    comment_sort = None
                     users = []
                     subreddits = []
                     query_params = {}
@@ -71,14 +72,17 @@ class FilterConfiguration():
                             elif(param == 'comments_items'):
                                 # the 'comments_items' parameter is used for choosing the limit of selected comments for each Reddit post
                                 comments_items = value
+                            elif(param == 'comment_sort'):
+                                # the 'comment_sort' parameter is used for choosing the order of selected comments for each Reddit post
+                                # in general, this parameter is combined with the parameter 'comments_items'
+                                comment_sort = value
                             else:
                                 # build a query params dictionary
                                 query_params[param] = value
 
                         # create a filter and append to list
-                        self.create_filter(key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, label)
-                        self._log.user_message(key + ' - ' + id + ' - ' + filter_type + ' - ' + str(items) + ' - ' + label)
+                        self.create_filter(key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label)
                 
-    def create_filter(self, key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, label) -> None:
-        filter = Filter(key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, label, self._log)
+    def create_filter(self, key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label) -> None:
+        filter = Filter(key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label, self._log)
         self._list_filters.append(filter)

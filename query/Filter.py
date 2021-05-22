@@ -1,6 +1,6 @@
 class Filter():
 
-    def __init__(self, key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, label, log) -> None:
+    def __init__(self, key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label, log) -> None:
         self._key = key
         self._id = id
         self._filter_type = filter_type
@@ -11,6 +11,7 @@ class Filter():
         self._comments = comments
         self._comments_limit = comments_limit
         self._comments_items = comments_items
+        self._comment_sort = comment_sort
         self._label = label
         self._log = log
 
@@ -53,6 +54,10 @@ class Filter():
     @property
     def comments_items(self):
         return int(self._comments_items)
+
+    @property
+    def comment_sort(self):
+        return self._comment_sort
 
     @property
     def label(self):
