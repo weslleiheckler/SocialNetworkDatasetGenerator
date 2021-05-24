@@ -18,7 +18,7 @@ class QueryTweets(QueryPostsInterface):
     def dict_df_posts(self):
         return self._set_dict_df_posts
 
-    def set_dict_df_posts(self, key, df):
+    def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
             self._set_dict_df_posts[key] = df
     
@@ -400,9 +400,9 @@ class QueryTweets(QueryPostsInterface):
         self.set_dict_df_posts('favorites', df_favorites)
         self._log.user_message('Favorites query finished.')
 
-        final_time_par = time.time() - start_time_par
-        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
-
         # wait the processes
         for p in processes:
             p.join()
+
+        final_time_par = time.time() - start_time_par
+        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
