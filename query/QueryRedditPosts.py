@@ -1,4 +1,3 @@
-from pandas.core.frame import DataFrame
 from query.QueryPostsInterface import QueryPostsInterface
 from multiprocessing import Process, Queue
 import time
