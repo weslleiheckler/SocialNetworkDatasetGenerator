@@ -20,7 +20,8 @@ class QueryTweets(QueryPostsInterface):
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
-            self._set_dict_df_posts[key] = df
+            k = 'twitter_' + key
+            self._set_dict_df_posts[k] = df
     
     def query(self, twitter_filter) -> pd.DataFrame:
         df = pd.DataFrame()
