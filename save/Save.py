@@ -63,4 +63,4 @@ class Save():
         self._log.user_message('Posts saved.')
 
         final_time_save = time.time() - start_time_save
-        self._log.timer_message('Saving process: ' + str(final_time_save) + ' seconds.')
+        self._log.timer_message('Saving Process: ' + str(final_time_save) + ' seconds.')

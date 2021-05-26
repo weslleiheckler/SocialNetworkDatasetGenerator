@@ -1,4 +1,5 @@
 from multiprocessing import Pool, Process, Queue
+import time
 import numpy as np
 import pandas as pd
 import re, string, inflect
@@ -157,6 +158,8 @@ class Preprocessing():
         queue.put(dict)
 
     def preprocessing(self) -> None:
+        start_time_pp = time.time()
+        
         # get the number of cores from the configuration
         n_cores = self._pp_config.n_cores
 
@@ -181,3 +184,6 @@ class Preprocessing():
         # wait the processes
         for p in processes:
             p.join()
+
+        final_time_pp = time.time() - start_time_pp
+        self._log.timer_message('Preprocessing Time: ' + str(final_time_pp) + ' seconds.')
