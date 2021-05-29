@@ -339,7 +339,7 @@ class QueryTweets(QueryPostsInterface):
         self._log.user_message('Favorites query finished.')
 
         final_time_seq = time.time() - start_time_seq
-        self._log.timer_message('Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
+        self._log.timer_message('Twitter - Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
 
     def query_parallel(self, list_filters) -> None:
         start_time_par = time.time()
@@ -406,4 +406,4 @@ class QueryTweets(QueryPostsInterface):
             p.join()
 
         final_time_par = time.time() - start_time_par
-        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+        self._log.timer_message('Twitter - Parallelized Query Time: ' + str(final_time_par) + ' seconds.')

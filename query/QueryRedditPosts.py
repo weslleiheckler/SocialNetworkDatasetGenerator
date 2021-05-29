@@ -48,8 +48,7 @@ class QueryRedditPosts(QueryPostsInterface):
                         'is_video': [],
                         'edited': [],
                         'archived': [],
-                        'author_name': [],
-                        'author_fullname': []
+                        'author_name': []
                         }  
 
         comments_dict = {'comment_id': [],
@@ -80,7 +79,6 @@ class QueryRedditPosts(QueryPostsInterface):
             posts_dict['edited'].append(post.edited)
             posts_dict['archived'].append(post.archived)
             posts_dict['author_name'].append(post.author.name)
-            posts_dict['author_fullname'].append(post.author.fullname)
 
             # create a dictionary with comments information
             if(reddit_filter.comments):
@@ -304,7 +302,7 @@ class QueryRedditPosts(QueryPostsInterface):
         self._log.user_message('Reddit rising posts\' query finished.')
 
         final_time_seq = time.time() - start_time_seq
-        self._log.timer_message('Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
+        self._log.timer_message('Reddit - Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
     
     def query_parallel(self, list_filters) -> None:
         start_time_par = time.time()
@@ -472,4 +470,4 @@ class QueryRedditPosts(QueryPostsInterface):
             p.join()
 
         final_time_par = time.time() - start_time_par
-        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+        self._log.timer_message('Reddit - Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
