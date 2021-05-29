@@ -20,7 +20,7 @@ class QueryTweets(QueryPostsInterface):
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
-            k = 'twitter_' + key
+            k = 'twitter_tweepy_' + key
             self._set_dict_df_posts[k] = df
     
     def query(self, twitter_filter) -> pd.DataFrame:
@@ -288,7 +288,7 @@ class QueryTweets(QueryPostsInterface):
 
     def query_manager(self) -> None:
         # select only the Twitter filters
-        list_twitter_filters = list(filter(lambda x: (x.key == 'Twitter'), self._list_filters))
+        list_twitter_filters = list(filter(lambda x: (x.key == 'Twitter' and x.library == 'tweepy'), self._list_filters))
 
         # both methods perform the same task using a parallel or sequential strategy
         if(self._parallelize):

@@ -21,7 +21,7 @@ class QueryRedditPosts(QueryPostsInterface):
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
             k = 'reddit_' + key
-            self._dict_df_posts[key] = df
+            self._dict_df_posts[k] = df
 
     def get_date(self, post_date):
         return dt.datetime.fromtimestamp(post_date)

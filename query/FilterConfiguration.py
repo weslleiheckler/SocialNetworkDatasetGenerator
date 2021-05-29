@@ -34,6 +34,13 @@ class FilterConfiguration():
                     label = ''
                     filter_type = ''
                     items = 0
+                    search = None
+                    lang = None
+                    since = None
+                    until = None
+                    translate = False
+                    translate_dest = None
+                    library = None
                     comments = False
                     comments_limit = 0
                     comments_items = 0
@@ -57,6 +64,31 @@ class FilterConfiguration():
                             elif(param == 'items'):
                                 # the 'items' parameter is used for choosing the number of items selected
                                 items = value
+                            elif(param == 'search'):
+                                # the 'search' parameter is used to set specific terms to search for tweets
+                                search = value
+                            elif(param == 'lang' and library == 'twint'):
+                                # the 'lang' parameter is used to set the language to search for tweets (twint)
+                                # the 'library' parameter must be above the 'lang' parameter in the configuration file
+                                # for the tweepy package, 'lang' is an internal parameter stored in the query_params dictionary
+                                lang = value
+                            elif(param == 'since' and library == 'twint'):
+                                # the 'since' parameter is used to set the start date to search for tweets (twint)
+                                # the 'library' parameter must be above the 'since' parameter in the configuration file
+                                # for the tweepy package, 'since' is an internal parameter stored in the query_params dictionary
+                                since = value
+                            elif(param == 'until'):
+                                # the 'until' parameter is used to set the final date to search for tweets (twint)
+                                until = value
+                            elif(param == 'translate'):
+                                # the 'translate' parameter is used to define whether the tweet will be translated
+                                if value == 'Yes': translate = True
+                            elif(param == 'translate_dest'):
+                                # the 'translate_dest' parameter is used to define the language for tweet translation
+                                translate_dest = value
+                            elif(param == 'library'):
+                                # the 'library' parameter is used to define the library for collecting Twitter data
+                                library = value
                             elif(param == 'id'):
                                 # the 'users' parameter is used for passing a list of users to get users' information
                                 users = value.split(',')
@@ -65,7 +97,7 @@ class FilterConfiguration():
                                 subreddits = value.split(',')  
                             elif(param == 'comments'):
                                 # the 'comments' parameter is used for querying comments of Reddit posts
-                                comments = True if value == 'Yes' else False
+                                if value == 'Yes': comments = True
                             elif(param == 'comments_limit'):
                                 # the 'comments_limit' parameter is used for choosing the limit to the 'replace_more' method of the Praw package
                                 comments_limit = value
@@ -81,8 +113,11 @@ class FilterConfiguration():
                                 query_params[param] = value
 
                         # create a filter and append to list
-                        self.create_filter(key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label)
+                        self.create_filter(key, id, filter_type, query_params, users, subreddits, items, search, lang, since, until, translate, translate_dest, 
+                                            library, comments, comments_limit, comments_items, comment_sort, label)
                 
-    def create_filter(self, key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label) -> None:
-        filter = Filter(key, id, filter_type, query_params, users, subreddits, items, comments, comments_limit, comments_items, comment_sort, label, self._log)
+    def create_filter(self, key, id, filter_type, query_params, users, subreddits, items, search, lang, since, until, translate, translate_dest, 
+                        library, comments, comments_limit, comments_items, comment_sort, label) -> None:
+        filter = Filter(key, id, filter_type, query_params, users, subreddits, items, search, lang, since, until, translate, translate_dest,
+                        library, comments, comments_limit, comments_items, comment_sort, label, self._log)
         self._list_filters.append(filter)

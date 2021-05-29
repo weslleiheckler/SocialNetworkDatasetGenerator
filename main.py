@@ -1,6 +1,7 @@
 from authentication import TwitterAuthenticator as tt
 from authentication import RedditAuthenticator as rd
 from query import QueryTweets as qt
+from query import QueryTweetsV2 as qt2
 from query import QueryRedditPosts as qr
 from query import FilterConfiguration as fc
 from preprocessing import PreprocessingConfiguration as pc
@@ -32,16 +33,28 @@ class Main():
         twitter_conn = tt.TwitterAuthenticator(logging)
         twitter_conn.connect()
 
-        # Twitter query
-        tt_query = qt.QueryTweets(twitter_conn, filter_conf.list_filters, True, logging)
-        tt_query.query_manager()
+        # Twitter query with tweepy
+        tt_query_tweepy = qt.QueryTweets(twitter_conn, filter_conf.list_filters, True, logging)
+        tt_query_tweepy.query_manager()        
 
         # Twitter preprocessing
-        preprocessing = pp.Preprocessing(pp_config, tt_query.dict_df_posts, logging)
+        preprocessing = pp.Preprocessing(pp_config, tt_query_tweepy.dict_df_posts, logging)
         preprocessing.preprocessing()
 
         # Twitter save
-        save = sv.Save(save_config, tt_query.dict_df_posts, logging)
+        save = sv.Save(save_config, tt_query_tweepy.dict_df_posts, logging)
+        save.save()
+
+        # Twitter query with twint
+        tt_query_twint = qt2.QueryTweetsV2(twitter_conn, filter_conf.list_filters, True, logging)
+        tt_query_twint.query_manager()
+
+        # Twitter preprocessing
+        preprocessing = pp.Preprocessing(pp_config, tt_query_twint.dict_df_posts, logging)
+        preprocessing.preprocessing()
+
+        # Twitter save
+        save = sv.Save(save_config, tt_query_twint.dict_df_posts, logging)
         save.save()
 
         # Reddit connection
