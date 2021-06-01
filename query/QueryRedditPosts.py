@@ -106,8 +106,7 @@ class QueryRedditPosts(QueryPostsInterface):
         df_comments = pd.DataFrame(comments_dict)
 
         # format the date
-        ts = df_posts['created'].apply(self.get_date)
-        df_posts = df_posts.assign(timestamp = ts)
+        df_posts['created_formatted'] = df_posts['created'].apply(self.get_date)
 
         # create a column with the value from the 'label' filter parameter
         if(reddit_filter.label is not None):
