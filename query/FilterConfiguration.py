@@ -6,11 +6,31 @@ class FilterConfiguration():
 
     def __init__(self, log) -> None:
         self._list_filters = []
+        self._tweepy = False
+        self._twint = False
+        self._praw = False
+        self._pmaw = False
         self._log = log
 
     @property
     def list_filters(self):
         return self._list_filters
+
+    @property
+    def tweepy(self):
+        return self._tweepy
+
+    @property
+    def twint(self):
+        return self._twint
+
+    @property
+    def praw(self):
+        return self._praw
+
+    @property
+    def pmaw(self):
+        return self._pmaw
 
     def import_filters(self) -> None:
         
@@ -88,8 +108,17 @@ class FilterConfiguration():
                                 # the 'translate_dest' parameter is used to define the language for tweet translation
                                 translate_dest = value
                             elif(param == 'library'):
-                                # the 'library' parameter is used to define the library for collecting Twitter data
+                                # the 'library' parameter is used to define the library for collecting data
                                 library = value
+
+                                if(library == 'tweepy'):
+                                    self._tweepy = True
+                                elif(library == 'twint'):
+                                    self._twint = True
+                                elif(library == 'praw'):
+                                    self._praw = True
+                                elif(library == 'pmaw'):
+                                    self._pmaw = True
                             elif(param == 'id'):
                                 # the 'users' parameter is used for passing a list of users to get users' information
                                 users = value.split(',')

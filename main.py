@@ -16,7 +16,7 @@ class Main():
     def main():
 
         # create a logger
-        logging = log.Logging(user_messages=False,timer_messages=True)
+        logging = log.Logging(user_messages = False, timer_messages = True)
 
         # filter configurations
         filter_conf = fc.FilterConfiguration(logging)
@@ -30,61 +30,69 @@ class Main():
         save_config = sc.SaveConfiguration(logging)
         save_config.config()
 
-        # Twitter connection
-        twitter_conn = tt.TwitterAuthenticator(logging)
-        twitter_conn.connect()
+        # tweepy
+        if(filter_conf.tweepy):
+            # Twitter connection
+            twitter_conn = tt.TwitterAuthenticator(logging)
+            twitter_conn.connect()
 
-        # Twitter query with tweepy
-        tt_query_tweepy = qt.QueryTweets(twitter_conn, filter_conf.list_filters, True, logging)
-        tt_query_tweepy.query_manager()        
+            # Twitter query
+            tt_query_tweepy = qt.QueryTweets(twitter_conn, filter_conf.list_filters, True, logging)
+            tt_query_tweepy.query_manager()        
 
-        # Twitter preprocessing
-        preprocessing = pp.Preprocessing(pp_config, tt_query_tweepy.dict_df_posts, logging)
-        preprocessing.preprocessing()
+            # Twitter preprocessing
+            preprocessing = pp.Preprocessing(pp_config, tt_query_tweepy.dict_df_posts, logging)
+            preprocessing.preprocessing()
 
-        # Twitter save
-        save = sv.Save(save_config, tt_query_tweepy.dict_df_posts, logging)
-        save.save()
+            # Twitter save
+            save = sv.Save(save_config, tt_query_tweepy.dict_df_posts, logging)
+            save.save()
 
-        # Twitter query with twint
-        tt_query_twint = qt2.QueryTweetsV2(filter_conf.list_filters, True, logging)
-        tt_query_twint.query_manager()
+        # twint
+        if(filter_conf.twint):        
+            # Twitter query
+            tt_query_twint = qt2.QueryTweetsV2(filter_conf.list_filters, True, logging)
+            tt_query_twint.query_manager()
 
-        # Twitter preprocessing
-        preprocessing = pp.Preprocessing(pp_config, tt_query_twint.dict_df_posts, logging)
-        preprocessing.preprocessing()
+            # Twitter preprocessing
+            preprocessing = pp.Preprocessing(pp_config, tt_query_twint.dict_df_posts, logging)
+            preprocessing.preprocessing()
 
-        # Twitter save
-        save = sv.Save(save_config, tt_query_twint.dict_df_posts, logging)
-        save.save()
+            # Twitter save
+            save = sv.Save(save_config, tt_query_twint.dict_df_posts, logging)
+            save.save()
 
-        # Reddit connection
-        reddit_conn = rd.RedditAuthenticator(logging)
-        reddit_conn.connect()
+        # praw
+        if(filter_conf.praw):
+            # Reddit connection
+            reddit_conn = rd.RedditAuthenticator(logging)
+            reddit_conn.connect()
 
-        # Reddit query with praw
-        rt_query_praw = qr.QueryRedditPosts(reddit_conn, filter_conf.list_filters, True, logging)
-        rt_query_praw.query_manager()
+            # Reddit query
+            rt_query_praw = qr.QueryRedditPosts(reddit_conn, filter_conf.list_filters, True, logging)
+            rt_query_praw.query_manager()
 
-        # Reddit preprocessing
-        preprocessing = pp.Preprocessing(pp_config, rt_query_praw.dict_df_posts, logging)
-        preprocessing.preprocessing()
+            # Reddit preprocessing
+            preprocessing = pp.Preprocessing(pp_config, rt_query_praw.dict_df_posts, logging)
+            preprocessing.preprocessing()
 
-        # Reddit save
-        save = sv.Save(save_config, rt_query_praw.dict_df_posts, logging)
-        save.save()
+            # Reddit save
+            save = sv.Save(save_config, rt_query_praw.dict_df_posts, logging)
+            save.save()
 
-        # Reddit query with pmaw
-        rt_query_pmaw = qr2.QueryRedditPostsV2(filter_conf.list_filters, True, logging)
-        rt_query_pmaw.query_manager()
+        # pmaw
+        if(filter_conf.pmaw):
+            # Reddit query
+            rt_query_pmaw = qr2.QueryRedditPostsV2(filter_conf.list_filters, True, logging)
+            rt_query_pmaw.query_manager()
 
-        # Reddit preprocessing
-        preprocessing = pp.Preprocessing(pp_config, rt_query_pmaw.dict_df_posts, logging)
-        preprocessing.preprocessing()
+            # Reddit preprocessing
+            preprocessing = pp.Preprocessing(pp_config, rt_query_pmaw.dict_df_posts, logging)
+            preprocessing.preprocessing()
 
-        # Reddit save
-        save = sv.Save(save_config, rt_query_pmaw.dict_df_posts, logging)
-        save.save()
+            # Reddit save
+            save = sv.Save(save_config, rt_query_pmaw.dict_df_posts, logging)
+            save.save()
 
     if __name__ == "__main__":
         main()
