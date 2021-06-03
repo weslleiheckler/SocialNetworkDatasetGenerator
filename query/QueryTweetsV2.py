@@ -7,9 +7,8 @@ import pandas as pd
 
 class QueryTweetsV2(QueryPostsInterface):
 
-    def __init__(self, authenticator, list_filters, parallelize, log) -> None:
+    def __init__(self, list_filters, parallelize, log) -> None:
         super().__init__()
-        self._authenticator = authenticator
         self._list_filters = list_filters
         self._parallelize = parallelize
         self._log = log
@@ -19,9 +18,6 @@ class QueryTweetsV2(QueryPostsInterface):
     @property
     def dict_df_posts(self):
         return self._set_dict_df_posts
-
-    def get_date(self, post_date):
-        return dt.datetime.fromtimestamp(post_date/1000)
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
@@ -65,9 +61,6 @@ class QueryTweetsV2(QueryPostsInterface):
             # standardize the name of the text column
             columns[0] = 'text' # change 'tweet' to 'text' for preprocessing
             df.columns = columns
-
-            # format the date
-            df['created_at_formatted'] = df['created_at'].apply(self.get_date)
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):

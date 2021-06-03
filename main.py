@@ -47,7 +47,7 @@ class Main():
         save.save()
 
         # Twitter query with twint
-        tt_query_twint = qt2.QueryTweetsV2(twitter_conn, filter_conf.list_filters, True, logging)
+        tt_query_twint = qt2.QueryTweetsV2(filter_conf.list_filters, True, logging)
         tt_query_twint.query_manager()
 
         # Twitter preprocessing

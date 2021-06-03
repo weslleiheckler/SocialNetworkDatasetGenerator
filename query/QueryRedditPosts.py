@@ -23,9 +23,6 @@ class QueryRedditPosts(QueryPostsInterface):
             k = 'reddit_praw_' + key
             self._dict_df_posts[k] = df
 
-    def get_date(self, post_date):
-        return dt.datetime.fromtimestamp(post_date)
-
     def create_dataframe_posts(self, list_posts, reddit_filter) -> pd.DataFrame:
         
         posts_dict = {'title': [],       
@@ -106,7 +103,7 @@ class QueryRedditPosts(QueryPostsInterface):
         df_comments = pd.DataFrame(comments_dict)
 
         # format the date
-        df_posts['created_formatted'] = df_posts['created'].apply(self.get_date)
+        df_posts['created_formatted'] = df_posts['created'].apply(dt.datetime.fromtimestamp)
 
         # create a column with the value from the 'label' filter parameter
         if(reddit_filter.label is not None):
@@ -129,37 +126,37 @@ class QueryRedditPosts(QueryPostsInterface):
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.top(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.top(**reddit_filter.query_params)
+                    search_subreddit = sub.top(limit = None, **reddit_filter.query_params)
             elif(reddit_filter.filter_type == 'hot'):
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.hot(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.hot(**reddit_filter.query_params)
+                    search_subreddit = sub.hot(limit = None, **reddit_filter.query_params)
             elif(reddit_filter.filter_type == 'new'):
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.new(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.new(**reddit_filter.query_params)
+                    search_subreddit = sub.new(limit = None, **reddit_filter.query_params)
             elif(reddit_filter.filter_type == 'controversial'):
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.controversial(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.controversial(**reddit_filter.query_params)
+                    search_subreddit = sub.controversial(limit = None, **reddit_filter.query_params)
             elif(reddit_filter.filter_type == 'gilded'):
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.gilded(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.gilded(**reddit_filter.query_params)
+                    search_subreddit = sub.gilded(limit = None, **reddit_filter.query_params)
             elif(reddit_filter.filter_type == 'rising'):
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.rising(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.rising(**reddit_filter.query_params)
+                    search_subreddit = sub.rising(limit = None, **reddit_filter.query_params)
             else: # reddit_filter.filter_type == 'search'
                 if(reddit_filter.items > 0):
                     search_subreddit = sub.search(limit = reddit_filter.items, **reddit_filter.query_params)
                 else:
-                    search_subreddit = sub.search(**reddit_filter.query_params)
+                    search_subreddit = sub.search(limit = None, **reddit_filter.query_params)
 
             # create the dataframes with specific columns
             df_posts, df_comments = self.create_dataframe_posts(search_subreddit, reddit_filter)
