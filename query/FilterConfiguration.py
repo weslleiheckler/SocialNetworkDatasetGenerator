@@ -1,5 +1,6 @@
 import configparser, os
 from query.Filter import Filter
+import datetime as dt
 
 class FilterConfiguration():
 
@@ -77,7 +78,7 @@ class FilterConfiguration():
                                 # the 'library' parameter must be above the 'since' parameter in the configuration file
                                 # for the tweepy package, 'since' is an internal parameter stored in the query_params dictionary
                                 since = value
-                            elif(param == 'until'):
+                            elif(param == 'until' and library == 'twint'):
                                 # the 'until' parameter is used to set the final date to search for tweets (twint)
                                 until = value
                             elif(param == 'translate'):
@@ -110,7 +111,13 @@ class FilterConfiguration():
                                 comment_sort = value
                             else:
                                 # build a query params dictionary
-                                query_params[param] = value
+                                if((param in ('since','until')) and library == 'pmaw'):
+                                    date = dt.datetime.strptime(value, "%Y-%m-%d")
+                                    timestamp = int(dt.datetime.timestamp(date))
+                                    k = 'after' if(param == 'since') else 'before'
+                                    query_params[k] = timestamp
+                                else:
+                                    query_params[param] = value
 
                         # create a filter and append to list
                         self.create_filter(key, id, filter_type, query_params, users, subreddits, items, search, lang, since, until, translate, translate_dest, 

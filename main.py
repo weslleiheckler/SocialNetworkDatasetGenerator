@@ -3,6 +3,7 @@ from authentication import RedditAuthenticator as rd
 from query import QueryTweets as qt
 from query import QueryTweetsV2 as qt2
 from query import QueryRedditPosts as qr
+from query import QueryRedditPostsV2 as qr2
 from query import FilterConfiguration as fc
 from preprocessing import PreprocessingConfiguration as pc
 from preprocessing import Preprocessing as pp
@@ -61,16 +62,28 @@ class Main():
         reddit_conn = rd.RedditAuthenticator(logging)
         reddit_conn.connect()
 
-        # Reddit query
-        rt_query = qr.QueryRedditPosts(reddit_conn, filter_conf.list_filters, True, logging)
-        rt_query.query_manager()
+        # Reddit query with praw
+        rt_query_praw = qr.QueryRedditPosts(reddit_conn, filter_conf.list_filters, True, logging)
+        rt_query_praw.query_manager()
 
         # Reddit preprocessing
-        preprocessing = pp.Preprocessing(pp_config, rt_query.dict_df_posts, logging)
+        preprocessing = pp.Preprocessing(pp_config, rt_query_praw.dict_df_posts, logging)
         preprocessing.preprocessing()
 
         # Reddit save
-        save = sv.Save(save_config, rt_query.dict_df_posts, logging)
+        save = sv.Save(save_config, rt_query_praw.dict_df_posts, logging)
+        save.save()
+
+        # Reddit query with pmaw
+        rt_query_pmaw = qr2.QueryRedditPostsV2(filter_conf.list_filters, True, logging)
+        rt_query_pmaw.query_manager()
+
+        # Reddit preprocessing
+        preprocessing = pp.Preprocessing(pp_config, rt_query_pmaw.dict_df_posts, logging)
+        preprocessing.preprocessing()
+
+        # Reddit save
+        save = sv.Save(save_config, rt_query_pmaw.dict_df_posts, logging)
         save.save()
 
     if __name__ == "__main__":

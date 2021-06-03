@@ -20,7 +20,7 @@ class QueryRedditPosts(QueryPostsInterface):
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
-            k = 'reddit_' + key
+            k = 'reddit_praw_' + key
             self._dict_df_posts[k] = df
 
     def get_date(self, post_date):
@@ -180,7 +180,7 @@ class QueryRedditPosts(QueryPostsInterface):
     
     def query_manager(self) -> None:
         # select only the Reddit filters
-        list_reddit_filters = list(filter(lambda x: (x.key == 'Reddit'), self._list_filters))
+        list_reddit_filters = list(filter(lambda x: (x.key == 'Reddit' and x.library == 'praw'), self._list_filters))
 
         # both methods perform the same task using a parallel or sequential strategy
         if(self._parallelize):
