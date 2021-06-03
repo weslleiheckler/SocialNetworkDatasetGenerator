@@ -1,6 +1,7 @@
 from query.QueryPostsInterface import QueryPostsInterface
 from multiprocessing import Process, Queue
 import time
+import datetime as dt
 import tweepy as tw
 import pandas as pd
 
@@ -20,7 +21,9 @@ class QueryTweets(QueryPostsInterface):
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
-            k = 'twitter_tweepy_' + key
+            now = dt.datetime.now()
+            dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
+            k = 'twitter_tweepy_' + key + '_' + dt_string
             self._set_dict_df_posts[k] = df
     
     def query(self, twitter_filter) -> pd.DataFrame:
@@ -287,6 +290,8 @@ class QueryTweets(QueryPostsInterface):
         queue.put(df)
 
     def query_manager(self) -> None:
+        self._log.timer_message('Collecting Twitter data with the tweepy package.')
+        
         # select only the Twitter filters
         list_twitter_filters = list(filter(lambda x: (x.key == 'Twitter' and x.library == 'tweepy'), self._list_filters))
 
@@ -339,7 +344,7 @@ class QueryTweets(QueryPostsInterface):
         self._log.user_message('Favorites query finished.')
 
         final_time_seq = time.time() - start_time_seq
-        self._log.timer_message('Twitter - Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
+        self._log.timer_message('Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
 
     def query_parallel(self, list_filters) -> None:
         start_time_par = time.time()
@@ -406,4 +411,4 @@ class QueryTweets(QueryPostsInterface):
             p.join()
 
         final_time_par = time.time() - start_time_par
-        self._log.timer_message('Twitter - Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')

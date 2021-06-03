@@ -21,7 +21,9 @@ class QueryRedditPostsV2(QueryPostsInterface):
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
-            k = 'reddit_pmaw_' + key
+            now = dt.datetime.now()
+            dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
+            k = 'reddit_pmaw_' + key + '_' + dt_string
             self._dict_df_posts[k] = df
 
     def query(self, reddit_filter, subreddit) -> pd.DataFrame:
@@ -57,6 +59,8 @@ class QueryRedditPostsV2(QueryPostsInterface):
         queue.put(df_posts)
     
     def query_manager(self) -> None:
+        self._log.timer_message('Collecting Reddit data with the pmaw package.')
+        
         # select only the Reddit filters
         list_reddit_filters = list(filter(lambda x: (x.key == 'Reddit' and x.library == 'pmaw'), self._list_filters))
 
@@ -88,7 +92,7 @@ class QueryRedditPostsV2(QueryPostsInterface):
         self._log.user_message('Reddit posts\' query finished.')
 
         final_time_seq = time.time() - start_time_seq
-        self._log.timer_message('Reddit - Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
+        self._log.timer_message('Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
     
     def query_parallel(self, list_filters) -> None:
         start_time_par = time.time()
@@ -123,4 +127,4 @@ class QueryRedditPostsV2(QueryPostsInterface):
             p.join()
 
         final_time_par = time.time() - start_time_par
-        self._log.timer_message('Reddit - Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')

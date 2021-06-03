@@ -21,7 +21,9 @@ class QueryTweetsV2(QueryPostsInterface):
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
-            k = 'twitter_twint_' + key
+            now = dt.datetime.now()
+            dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
+            k = 'twitter_twint_' + key + '_' + dt_string
             self._set_dict_df_posts[k] = df
     
     def query(self, twitter_filter) -> pd.DataFrame:
@@ -94,6 +96,8 @@ class QueryTweetsV2(QueryPostsInterface):
         queue.put(df)
 
     def query_manager(self) -> None:
+        self._log.timer_message('Collecting Twitter data with the twint package.')
+        
         # select only the Twitter filters
         list_twitter_filters = list(filter(lambda x: (x.key == 'Twitter' and x.library == 'twint'), self._list_filters))
 
@@ -146,7 +150,7 @@ class QueryTweetsV2(QueryPostsInterface):
         self._log.user_message('Favorites query finished.')
 
         final_time_seq = time.time() - start_time_seq
-        self._log.timer_message('Twitter - Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
+        self._log.timer_message('Sequential Query Time: ' + str(final_time_seq) + ' seconds.')
 
     def query_parallel(self, list_filters) -> None:
         start_time_par = time.time()
@@ -213,4 +217,4 @@ class QueryTweetsV2(QueryPostsInterface):
             p.join()
 
         final_time_par = time.time() - start_time_par
-        self._log.timer_message('Twitter - Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
+        self._log.timer_message('Parallelized Query Time: ' + str(final_time_par) + ' seconds.')
