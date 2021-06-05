@@ -55,14 +55,10 @@ class QueryTweetsV2(QueryPostsInterface):
             twint.output.clean_lists()
 
             # store in a dataframe
-            columns = ['tweet', 'id', 'conversation_id', 'created_at', 'date', 'timezone', 'place', 'language', 'hashtags', 'cashtags', 'user_id', 'user_id_str',
-                        'username', 'name', 'day', 'hour', 'link', 'urls', 'photos', 'video', 'thumbnail', 'retweet', 'nlikes', 'nreplies', 'nretweets', 'quote_url',
-                        'search', 'near', 'geo', 'source', 'user_rt_id', 'user_rt', 'retweet_id', 'reply_to', 'retweet_date', 'translate', 'trans_src', 'trans_dest']
-            df = twint.storage.panda.Tweets_df[columns].copy()
+            df = twint.storage.panda.Tweets_df.copy()
 
             # standardize the name of the text column
-            columns[0] = 'text' # change 'tweet' to 'text' for preprocessing
-            df.columns = columns
+            df.rename(columns = {'tweet': 'text'}, inplace = True) # change 'tweet' to 'text' for preprocessing
 
             # create a column with the value from the 'label' filter parameter
             if(twitter_filter.label is not None):
