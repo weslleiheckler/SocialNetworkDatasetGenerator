@@ -129,10 +129,12 @@ class Preprocessing():
         df_split = np.array_split(df, n_cores)
 
         # create a pool of processes
-        with Pool(n_cores) as pool:
-            # apply the function and concatenate the divided dataframes
-            df = pd.concat(pool.map(func, df_split))
-            pool.join()
+        pool = Pool(n_cores)   
+             
+        # apply the function and concatenate the divided dataframes
+        df = pd.concat(pool.map(func, df_split))
+        pool.close()
+        pool.join()
 
         return df
 
