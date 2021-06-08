@@ -13,18 +13,18 @@ class QueryTweets(QueryPostsInterface):
         self._list_filters = list_filters
         self._parallelize = parallelize
         self._log = log
-        self._set_dict_df_posts = {}
+        self._dict_df_posts = {}
 
     @property
     def dict_df_posts(self):
-        return self._set_dict_df_posts
+        return self._dict_df_posts
 
     def set_dict_df_posts(self, key, df) -> None:
         if(len(df) > 0):
             now = dt.datetime.now()
             dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
             k = 'twitter_tweepy_' + key + '_' + dt_string
-            self._set_dict_df_posts[k] = df
+            self._dict_df_posts[k] = df
     
     def query(self, twitter_filter) -> pd.DataFrame:
         df = pd.DataFrame()

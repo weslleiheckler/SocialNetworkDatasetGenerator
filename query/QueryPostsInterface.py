@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
-import pandas as pd
 
 class QueryPostsInterface(ABC):
 
     @abstractmethod
-    def query(self, filter, topic = None) -> pd.DataFrame:
+    def query_manager(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def query_par(self, filter, queue, topic = None) -> None:
+    def query_sequential(self, list_filters) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def query_parallel(self, list_filters) -> None:
         raise NotImplementedError

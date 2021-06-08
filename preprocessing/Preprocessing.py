@@ -138,7 +138,7 @@ class Preprocessing():
 
         return df
 
-    def preprocessing_manager(self, key, df, n_cores, queue) -> pd.DataFrame:
+    def preprocessing_manager(self, key, df, n_cores, queue) -> None:
         # create a column for text preprocessing
         # the original text will be maintained in the original column
         # the preprocessed text will be saved in the new column
